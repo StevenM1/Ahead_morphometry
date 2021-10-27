@@ -1,0 +1,97 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<strong>png:</strong> 2"
+      ],
+      "text/latex": [
+       "\\textbf{png:} 2"
+      ],
+      "text/markdown": [
+       "**png:** 2"
+      ],
+      "text/plain": [
+       "png \n",
+       "  2 "
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "rm(list=ls())\n",
+    "library(fmsb)\n",
+    "dat <- read.csv('../data/radar_chart_data.csv', sep='\\t')\n",
+    "for(coln in 2:ncol(dat)) {\n",
+    "\tdat[,coln] <- as.numeric(dat[,coln])\n",
+    "}\n",
+    "\n",
+    "maxmin <- rbind(c(NA, apply(dat[,2:ncol(dat)], 2, max),\n",
+    "                c(NA, apply(dat[,2:ncol(dat)], 2, min))))\n",
+    "maxmin <- data.frame(rbind(rep(1, ncol(dat)), rep(-0.5, ncol(dat))))\n",
+    "zeroone <- data.frame(rbind(rep(0, ncol(dat)), rep(1, ncol(dat))))\n",
+    "colnames(zeroone) <- colnames(maxmin) <- colnames(dat)\n",
+    "\n",
+    "dat <- rbind(maxmin, zeroone, dat)\n",
+    "colnames(dat) <- c('ROI', 'Iron (M)', 'Myelin (M)', 'Iron (IQR)', 'Myelin (IQR)', 'Volume', 'Thickness (M)', 'Thickness (IQR)')\n",
+    "\n",
+    "pdf(file='../figures/R1/radar_chart.pdf', width=7, height=9)\n",
+    "par(mfrow=c(5,3), mar=c(0,0,1,0))\n",
+    "for(roi in 5:nrow(dat)) {\n",
+    " \ttmp <- dat[c(1,2,3,4,roi),2:ncol(dat)]\n",
+    "\tif(dat[roi,1] %in% c('STR', 'RN')) {\n",
+    "\t\tseg <- 7\n",
+    "\t\tmaxes <- c(1.25,1.25,1.25,1.25,1.25,1.25,1.25)\n",
+    "\t\ttmp[1,] <- maxes\n",
+    "\t} else {\n",
+    "\t\tseg <- 6\n",
+    "\t}\n",
+    "\tradarchart(tmp, #axistype=5, caxislabels=c(-.5, '', 0, '', .5, '', 1.0), axislabcol='black', calcex=1.2,\n",
+    "\tpty=c(32,32,16),\n",
+    "\tpcol=c(1,1,2),\n",
+    "\tplty=c(1,1,1),\n",
+    "\tplwd=c(1,1,2),\n",
+    "\tmaxmin=TRUE, \n",
+    "\tseg=seg, \n",
+    "\tvlabels=c(\"M Iron\", \"M\\nMyelin      \", \"IQR\\nIron\", \"Myelin IQR\", \"Volume\",\"M\\nThickn.\", 'IQR\\n      Thickn.'))\n",
+    "\n",
+    "    # manually add legend\n",
+    "    CGap=0\n",
+    "\tcaxislabels=c(-.5, '', 0, '', .5, '', 1.0, '')\n",
+    "    for(i in 0:seg) {\n",
+    "\t    \tCAXISLABELS <- caxislabels[i + 1]\n",
+    "\t    text(-0.05, (i + CGap)/(seg + CGap), CAXISLABELS, \n",
+    "\t                  col ='black', pos=4)\n",
+    "\t}\n",
+    "\n",
+    "\ttitle(dat[roi,1], adj=0.1)\n",
+    "}\n",
+    "dev.off()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "R",
+   "language": "R",
+   "name": "ir"
+  },
+  "language_info": {
+   "codemirror_mode": "r",
+   "file_extension": ".r",
+   "mimetype": "text/x-r-source",
+   "name": "R",
+   "pygments_lexer": "r",
+   "version": "3.6.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
